@@ -185,6 +185,7 @@ and C<after_dispatch> hooks. The design goal is to protect
 your users automagically without the need for changing your
 code. However, it does not protect requests other than C<POST>.
 
+
 =item *
 
 L<DeCSRF|Mojolicious::Plugin::DeCSRF>
@@ -194,6 +195,7 @@ in this plugin using regular expressions. This means,
 there is less magic, but makes the approach unfortunately rather
 inflexible. Also it applies the C<before_dispatch> hook, meaning it
 interferes with the whole application.
+
 
 =item *
 
@@ -207,6 +209,7 @@ first class support for C<GET> protection. It applies the
 C<before_route> hook and thus interferes the whole application.
 
 =back
+
 
 These plugins are great for CSRF protection without the need of
 writing code in controllers. L<Mojolicious::Plugin::NoCSRF>
