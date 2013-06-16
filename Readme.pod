@@ -2,13 +2,31 @@
 
 =head1 NAME
 
-Mojolicious::Plugin::NoCSRF - Defend CSRF Attacks with Control
+Mojolicious::Plugin::NoCSRF - Defend Cross-Site-Request-Forgery Attacks with Control
 
+
+=head1 SYNOPSIS
+
+  # Mojolicious::Lite
+  plugin 'NoCSRF';
+
+  # In routes
+  any '/information' => ('nocsrf') => sub {
+    shift->render(text => 'Fine!');
+  };
+
+  # In template
+  %= nocsrf_form_for '/check' => begin
+  %= text_input 'example'
+  % end
+
+  # In controllers
+  return $c->render(text => 'Fail!') unless $c->nocsrf;
 
 =head1 DESCRIPTION
 
-L<Mojolicious::Plugin::NoCSRF> is yet another CSRF attack protection
-plugin for Mojolicious.
+L<Mojolicious::Plugin::NoCSRF> is yet another Cross-Site-Request-Forgery
+attack protection plugin for Mojolicious.
 There is a bunch of other plugins on CPAN, with all having different
 design goals and using different approaches (see L<Alternatives|/ALTERNATIVES>).
 
@@ -25,24 +43,30 @@ and implements the following new one.
 
 =head2 register
 
-  plugin('NoCSRF' => {
+  plugin NoCSRF => {
     token_length => 20
-  });
-
+  };
 
 Called when registering the plugin.
 Accepts a parameter C<token_lenghth>, defining the length of the token in characters.
-Defaults to 16.
+Defaults to C<16>.
 
 
 =head1 ROUTE CONDITIONS
 
 =head2 nocsrf
 
+  # Mojolicious::Lite
+  any '/information' => ('nocsrf') => sub {
+    shift->render(text => 'Fine!');
+  };
+
+  # Mojolicious
   my $r = $mojo->routes;
   $r->post('/information')->over('nocsrf')->to(cb => sub {
     shift->render(text => 'Fine!');
-  })
+  });
+
 
 The C<nocsrf> route condition checks, if a C<NoCSRF> token exists
 (either as a URL or POST parameter or a header) and if it is valid.
@@ -54,24 +78,28 @@ The route cannot be passed otherwise.
 =head2 nocsrf_form_for
 
   # In templates:
-  %= nocsrf_form_for '/check' => (method => 'POST')
+  %= nocsrf_form_for '/check' => (method => 'POST'), begin
   %= text_input 'example'
   % end
 
 Taghelper for form creation.
 Accepts the same parameters as
-L<Mojolicious::Plugin::TagHelpers/form_for|form_for>
+L<form_for|Mojolicious::Plugin::TagHelpers/form_for>
 and automatically introduces a hidden nocsrf token value.
 
 
 =head2 nocsrf_url_for
 
+  # In Controllers
+  print $c->nocsrf_url_fro('my-route');
+
+  # In templates
   %= nocsrf_url_for '/check'
 
 Taghelper for url creation.
 Accepts the same parameters as
-L<Mojolicious::Controller/url_for|url_for>
-and automatically appends a nocsrf token parameter.
+L<url_for|Mojolicious::Controller/url_for>
+and automatically appends a C<nocsrf> token parameter.
 
 
 =head2 nocsrf_token
@@ -93,7 +121,7 @@ URL parameters.
 Compares the NoCSRF token, given as a parameter or as
 a C<X-NoCSRF> header, with the session value.
 Returns a true value, if no CSRF attack can be identified,
-therwise a false value is returned.
+otherwise a false value is returned.
 
 
 =head2 nocsrf_redirect_to
@@ -101,7 +129,7 @@ therwise a false value is returned.
   return unless $c->nocsrf_redirect_to;
   return unless $c->nocsrf_redirect_to('/invalid');
 
-In case the L</nocsrf|nocsrf> test fails, the user is
+In case the L<nocsrf|/nocsrf> test fails, the user is
 redirected to the current url or a given path or url.
 
 The flash value C<alert> will contain an error message.
@@ -112,7 +140,7 @@ The flash value C<alert> will contain an error message.
   return unless $c->nocsrf_render;
   return unless $c->nocsrf_render('invalid');
 
-In case the L</nocsrf|nocsrf> test fails, a template
+In case the L<nocsrf|/nocsrf> test fails, a template
 is rendered with the error code C<403>.
 If no template name is given, a default template is rendered
 
@@ -129,7 +157,7 @@ To secure an Ajax request, you could simply add this header to
 the C<XMLHttpRequest> object, maybe introduced as a meta tag
 in the underlying HTML document.
 
-  <meta name="nocsrf" value="g132fgfwedlcuhfh657" id="nocsrf" />
+  <meta name="nocsrf" value="<%= nocsrf_token %>" id="nocsrf" />
   <!-- ... -->
   <script>
     var r = new XMLHttpRequest();
@@ -147,7 +175,9 @@ The following plugins are alternatives to L<Mojolicious::Plugin::NoCSRF>.
 
 =over 4
 
-=item L<Mojolicious::Plugin::CSRFDefender|CSRFDefender>
+=item *
+
+L<Mojolicious::Plugin::CSRFDefender|CSRFDefender>
 
 This plugin parses all response bodies for forms to protect,
 and for each request it hooks into the C<before_dispatch>
@@ -155,7 +185,9 @@ and C<after_dispatch> hooks. The design goal is to protect
 your users automagically without the need for changing your
 code. However, it does not protect requests other than C<POST>.
 
-=item L<Mojolicious::Plugin::DeCSRF|DeCSRF>
+=item *
+
+L<Mojolicious::Plugin::DeCSRF|DeCSRF>
 
 All URLs that need to be protected are centrally defined
 in this plugin using regular expressions. This means,
@@ -163,7 +195,9 @@ there is less magic, but makes the approach unfortunately rather
 inflexible. Also it applies the C<before_dispatch> hook, meaning it
 interferes with the whole application.
 
-=item L<Mojolicious::Plugin::CSRFProtect|CSRFProtect>
+=item *
+
+L<Mojolicious::Plugin::CSRFProtect|CSRFProtect>
 
 This plugin overwrites the default C<form_for> helper
 and checks all non-C<GET> or -C<HEAD> request for a valid

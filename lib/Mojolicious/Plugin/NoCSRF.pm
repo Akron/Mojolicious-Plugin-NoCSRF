@@ -353,7 +353,9 @@ The following plugins are alternatives to L<Mojolicious::Plugin::NoCSRF>.
 
 =over 4
 
-=item L<Mojolicious::Plugin::CSRFDefender|CSRFDefender>
+=item *
+
+L<Mojolicious::Plugin::CSRFDefender|CSRFDefender>
 
 This plugin parses all response bodies for forms to protect,
 and for each request it hooks into the C<before_dispatch>
@@ -361,7 +363,9 @@ and C<after_dispatch> hooks. The design goal is to protect
 your users automagically without the need for changing your
 code. However, it does not protect requests other than C<POST>.
 
-=item L<Mojolicious::Plugin::DeCSRF|DeCSRF>
+=item *
+
+L<Mojolicious::Plugin::DeCSRF|DeCSRF>
 
 All URLs that need to be protected are centrally defined
 in this plugin using regular expressions. This means,
@@ -369,7 +373,9 @@ there is less magic, but makes the approach unfortunately rather
 inflexible. Also it applies the C<before_dispatch> hook, meaning it
 interferes with the whole application.
 
-=item L<Mojolicious::Plugin::CSRFProtect|CSRFProtect>
+=item *
+
+L<Mojolicious::Plugin::CSRFProtect|CSRFProtect>
 
 This plugin overwrites the default C<form_for> helper
 and checks all non-C<GET> or -C<HEAD> request for a valid
