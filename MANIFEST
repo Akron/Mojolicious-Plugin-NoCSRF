@@ -1,0 +1,6 @@
+lib/Mojolicious/Plugin/NoCSRF.pm
+t/nocsrf.t
+Changes
+MANIFEST
+LICENSE
+Makefile.PL
