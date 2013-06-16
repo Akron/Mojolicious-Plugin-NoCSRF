@@ -75,6 +75,16 @@ The route cannot be passed otherwise.
 
 =head1 HELPERS
 
+=head2 nocsrf
+
+ return $c->render(text => 'Fail!') unless $c->nocsrf;
+
+Compares the NoCSRF token, given as a parameter or as
+a C<X-NoCSRF> header, with the session value.
+Returns a true value, if no CSRF attack can be identified,
+otherwise a false value is returned.
+
+
 =head2 nocsrf_form_for
 
   # In templates:
@@ -112,16 +122,6 @@ to be used, e.g. for protection of Ajax requests.
 The token is base26 encoded to prevent random strings containing
 possibly insulting words, in case they are used as visible
 URL parameters.
-
-
-=head2 nocsrf
-
- return $c->render(text => 'Fail!') unless $c->nocsrf;
-
-Compares the NoCSRF token, given as a parameter or as
-a C<X-NoCSRF> header, with the session value.
-Returns a true value, if no CSRF attack can be identified,
-otherwise a false value is returned.
 
 
 =head2 nocsrf_redirect_to
