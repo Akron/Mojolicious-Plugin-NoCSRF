@@ -1,7 +1,7 @@
 package Mojolicious::Plugin::NoCSRF;
 use Mojo::Base 'Mojolicious::Plugin';
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 # Default error message
 our $ERROR  = 'No valid request';
@@ -22,6 +22,11 @@ sub register {
     });
   };
 
+  # Load notifications plugin
+  unless (exists $mojo->renderer->helpers->{notify}) {
+    $mojo->plugin('Notifications');
+  };
+
   # Load RandomString plugin with specific parametrization
   $mojo->plugin('Util::RandomString' => {
     nocsrf_token => {
@@ -29,7 +34,6 @@ sub register {
       length => ($param->{token_length} || 16)
     }
   });
-
 
   # Establish 'nocsrf' route condition
   $mojo->routes->add_condition(
@@ -113,7 +117,7 @@ sub register {
 
       $plugin->_init_i18n($c);
 
-      $c->flash(alert => $ERROR);
+      $c->notify(error => $ERROR);
       $c->redirect_to(@_);
       return;
     }
@@ -130,15 +134,16 @@ sub register {
 
       $plugin->_init_i18n($c);
 
-      $c->stash(alert => $ERROR);
+      $c->notify(error => $ERROR);
       $c->res->code(403);
 
       $c->render(scalar @_ ? @_ : (inline => <<'TEMPLATE'));
 <!DOCTYPE html>
 <html>
-  <head><title>403 - <%= stash 'alert' %></title></head>
+  <head><title>403</title></head>
   <body>
-    <h1>403</h1><h2 style="color: red"><%= stash 'alert' %></h2>
+    <h1>403</h1>
+%= notifications
   </body>
 </html>
 TEMPLATE
@@ -310,7 +315,7 @@ URL parameters.
 In case the L<nocsrf|/nocsrf> test fails, the user is
 redirected to the current url or a given path or url.
 
-The flash value C<alert> will contain an error message.
+An C<error> notification will contain an error message.
 
 
 =head2 nocsrf_render
@@ -322,7 +327,7 @@ In case the L<nocsrf|/nocsrf> test fails, a template
 is rendered with the error code C<403>.
 If no template name is given, a default template is rendered
 
-The stash value C<alert> will contain an error message.
+An C<error> notification will contain an error message.
 
 
 =head1 AJAX REQUESTS

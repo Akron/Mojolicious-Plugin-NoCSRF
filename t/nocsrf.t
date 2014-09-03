@@ -142,9 +142,9 @@ $t->get_ok($url)->content_is('Fine');
 
 
 $t->get_ok('/7')
-  ->text_is('head title', '403 - No valid request')
+  ->text_is('head title', '403')
   ->text_is('h1', 403)
-  ->text_is('h2', 'No valid request')
+  ->text_is('div.notify', 'No valid request')
   ->status_is(403);
 
 $url = $t->ua->get('/get_url?url=/7')->success->body;
