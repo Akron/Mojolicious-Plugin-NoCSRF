@@ -13,8 +13,8 @@ WriteMakefile(
     'Test::More' => 0
   },
   PREREQ_PM => {
-    'Mojolicious' => 3.93,
-    'Mojolicious::Plugin::I18N' => 1.0,
+    'Mojolicious' => 5.29,
+    'Mojolicious::Plugin::Localize' => 0.02,
     'Mojolicious::Plugin::Util::RandomString' => 0.02
     },
   META_MERGE   => {

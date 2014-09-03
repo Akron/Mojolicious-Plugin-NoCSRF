@@ -1,26 +1,26 @@
 package Mojolicious::Plugin::NoCSRF;
 use Mojo::Base 'Mojolicious::Plugin';
 
+
 our $VERSION = 0.02;
 
-# Default error message
-our $ERROR  = 'No valid request';
-
-# i18n
-my %LEXICON = (
-  de => 'Keine gültige Anfrage'
-);
 
 # Register plugin
 sub register {
   my ($plugin, $mojo, $param) = @_;
 
-  # Load internationalization plugin
-  unless (exists $mojo->renderer->helpers->{l}) {
-    $mojo->plugin(I18N => {
-      default => 'en'
-    });
-  };
+  # Add internationalization
+  $mojo->plugin(Localize => {
+    dict => {
+      NoCSRF => {
+        error => {
+          _ => sub { $_->locale },
+	  -en => 'No valid request',
+	  de  => 'Keine gültige Anfrage'
+        }
+      }
+    }
+  });
 
   # Load notifications plugin
   unless (exists $mojo->renderer->helpers->{notify}) {
@@ -46,18 +46,20 @@ sub register {
     nocsrf_form_for => sub {
       my $c = shift;
 
+      my $h = $c->helpers;
+
       # The form has a callback
       if ( defined $_[-1] && ref( $_[-1] ) eq 'CODE' ) {
 	my $cb = $_[-1];
 
 	# Add hidden field
 	$_[-1] = sub {
-	  $mojo->hidden_field(nocsrf => $c->nocsrf_token) . "\n" . $cb->();
+	  $mojo->hidden_field(nocsrf => $h->nocsrf_token) . "\n" . $cb->();
 	};
       }
 
       # Return form
-      return $c->form_for(@_);
+      return $h->form_for(@_);
     });
 
 
@@ -65,7 +67,8 @@ sub register {
   $mojo->helper(
     nocsrf_url_for => sub {
       my $c = shift;
-      return $c->url_for(@_)->query([ nocsrf => $c->nocsrf_token ]);
+      my $h = $c->helpers;
+      return $h->url_for(@_)->query([ nocsrf => $h->nocsrf_token ]);
     }
   );
 
@@ -112,12 +115,12 @@ sub register {
     nocsrf_redirect_to => sub {
       my $c = shift;
 
+      my $h = $c->helpers;
+
       # No attack detected
-      return 1 if $c->nocsrf;
+      return 1 if $h->nocsrf;
 
-      $plugin->_init_i18n($c);
-
-      $c->notify(error => $ERROR);
+      $h->notify(error => $h->loc('NoCSRF_error'));
       $c->redirect_to(@_);
       return;
     }
@@ -129,12 +132,12 @@ sub register {
     nocsrf_render => sub {
       my $c = shift;
 
+      my $h = $c->helpers;
+
       # No attack detected
-      return 1 if $c->nocsrf;
+      return 1 if $h->nocsrf;
 
-      $plugin->_init_i18n($c);
-
-      $c->notify(error => $ERROR);
+      $h->notify(error => $h->loc('NoCSRF_error'));
       $c->res->code(403);
 
       $c->render(scalar @_ ? @_ : (inline => <<'TEMPLATE'));
@@ -151,28 +154,6 @@ TEMPLATE
       return;
     }
   );
-};
-
-
-# Approach by sharifulin
-sub _init_i18n {
-  return if $_[0]->{_init_i18n};
-  my $plugin = shift;
-
-  my $c = shift or return;
-
-  my $i18n = $c->stash('i18n') or return;
-
-  {
-    no strict 'refs';
-    for (qw/de/) {
-      my $module = $i18n->{namespace} . "::${_}::Lexicon";
-      ${$module}{$ERROR} //= $LEXICON{$_};
-    };
-  };
-
-  $plugin->{_init_i18n} = 1;
-  return;
 };
 
 
@@ -403,7 +384,7 @@ regarding the protection level.
 =head1 DEPENDENCIES
 
 L<Mojolicious>,
-L<Mojolicious::Plugin::I18N>,
+L<Mojolicious::Plugin::Localize>,
 L<Mojolicious::Plugin::Util::RandomString>.
 
 
@@ -414,7 +395,7 @@ L<Mojolicious::Plugin::Util::RandomString>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2013-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

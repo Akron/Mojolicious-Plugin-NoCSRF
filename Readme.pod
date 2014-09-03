@@ -132,7 +132,7 @@ URL parameters.
 In case the L<nocsrf|/nocsrf> test fails, the user is
 redirected to the current url or a given path or url.
 
-The flash value C<alert> will contain an error message.
+An C<error> notification will contain an error message.
 
 
 =head2 nocsrf_render
@@ -144,7 +144,7 @@ In case the L<nocsrf|/nocsrf> test fails, a template
 is rendered with the error code C<403>.
 If no template name is given, a default template is rendered
 
-The stash value C<alert> will contain an error message.
+An C<error> notification will contain an error message.
 
 
 =head1 AJAX REQUESTS
@@ -220,7 +220,7 @@ regarding the protection level.
 =head1 DEPENDENCIES
 
 L<Mojolicious>,
-L<Mojolicious::Plugin::I18N>,
+L<Mojolicious::Plugin::Localize>,
 L<Mojolicious::Plugin::Util::RandomString>.
 
 
@@ -231,7 +231,7 @@ L<Mojolicious::Plugin::Util::RandomString>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2013-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
