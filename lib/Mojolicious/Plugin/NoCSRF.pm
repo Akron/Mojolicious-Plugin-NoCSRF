@@ -2,8 +2,9 @@ package Mojolicious::Plugin::NoCSRF;
 use Mojo::Base 'Mojolicious::Plugin';
 
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
+# Todo: Make nocsrf_render to reply->nocsrf
 
 # Register plugin
 sub register {
@@ -132,12 +133,10 @@ sub register {
     nocsrf_render => sub {
       my $c = shift;
 
-      my $h = $c->helpers;
-
       # No attack detected
-      return 1 if $h->nocsrf;
+      return 1 if $c->nocsrf;
 
-      $h->notify(error => $h->loc('NoCSRF_error'));
+      $c->notify(error => $c->loc('NoCSRF_error'));
       $c->res->code(403);
 
       $c->render(scalar @_ ? @_ : (inline => <<'TEMPLATE'));
@@ -146,7 +145,7 @@ sub register {
   <head><title>403</title></head>
   <body>
     <h1>403</h1>
-%= notifications
+%= notifications 'html'
   </body>
 </html>
 TEMPLATE
@@ -265,7 +264,7 @@ and automatically introduces a hidden nocsrf token value.
 =head2 nocsrf_url_for
 
   # In Controllers
-  print $c->nocsrf_url_fro('my-route');
+  print $c->nocsrf_url_for('my-route');
 
   # In templates
   %= nocsrf_url_for '/check'
