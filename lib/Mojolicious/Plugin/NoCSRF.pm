@@ -1,35 +1,43 @@
 package Mojolicious::Plugin::NoCSRF;
 use Mojo::Base 'Mojolicious::Plugin';
 
+# See: https://docs.djangoproject.com/en/dev/ref/csrf/#how-csrf-works
 
-our $VERSION = 0.03;
+our $VERSION = '0.04';
 
 # Todo: Make nocsrf_render to reply->nocsrf
 
 # Register plugin
 sub register {
-  my ($plugin, $mojo, $param) = @_;
+  my ($plugin, $app, $param) = @_;
+
+  $param ||= {};
+
+  # Load parameter from Config file
+  if (my $config_param = $app->config('NoCSRF')) {
+    $param = { %$param, %$config_param };
+  };
 
   # Add internationalization
-  $mojo->plugin(Localize => {
+  $app->plugin(Localize => {
     dict => {
       NoCSRF => {
         error => {
           _ => sub { $_->locale },
-	  -en => 'No valid request',
-	  de  => 'Keine gültige Anfrage'
+          -en => 'No valid request',
+          de  => 'Keine gültige Anfrage'
         }
       }
     }
   });
 
   # Load notifications plugin
-  unless (exists $mojo->renderer->helpers->{notify}) {
-    $mojo->plugin('Notifications');
+  unless (exists $app->renderer->helpers->{notify}) {
+    $app->plugin('Notifications');
   };
 
   # Load RandomString plugin with specific parametrization
-  $mojo->plugin('Util::RandomString' => {
+  $app->plugin('Util::RandomString' => {
     nocsrf_token => {
       alphabet => '2345679bdfhmnprtFGHJLMNPRT',
       length => ($param->{token_length} || 16)
@@ -37,13 +45,13 @@ sub register {
   });
 
   # Establish 'nocsrf' route condition
-  $mojo->routes->add_condition(
+  $app->routes->add_condition(
     nocsrf => sub { return $_[1]->nocsrf }
   );
 
   # Establish 'nocsrf_form_for' helper
   # Based on CSRFProtect
-  $mojo->helper(
+  $app->helper(
     nocsrf_form_for => sub {
       my $c = shift;
 
@@ -51,12 +59,12 @@ sub register {
 
       # The form has a callback
       if ( defined $_[-1] && ref( $_[-1] ) eq 'CODE' ) {
-	my $cb = $_[-1];
+        my $cb = $_[-1];
 
-	# Add hidden field
-	$_[-1] = sub {
-	  $mojo->hidden_field(nocsrf => $h->nocsrf_token) . "\n" . $cb->();
-	};
+        # Add hidden field
+        $_[-1] = sub {
+          $c->hidden_field(nocsrf => $h->nocsrf_token) . "\n" . $cb->();
+        };
       }
 
       # Return form
@@ -65,7 +73,7 @@ sub register {
 
 
   # Establish 'nocsrf_url_for' helper
-  $mojo->helper(
+  $app->helper(
     nocsrf_url_for => sub {
       my $c = shift;
       my $h = $c->helpers;
@@ -75,7 +83,7 @@ sub register {
 
 
   # Establish 'nocsrf_token' helper
-  $mojo->helper(
+  $app->helper(
     nocsrf_token => sub {
       my $c = shift;
 
@@ -92,17 +100,16 @@ sub register {
     }
   );
 
-
   # Establish 'nocsrf' helper
-  $mojo->helper(
+  $app->helper(
     nocsrf => sub {
       my $c = shift;
 
       # Get nocsrf token
       my $param = (
-	scalar $c->param('nocsrf') ||
-	  $c->req->headers->header('X-NoCSRF')
-	) or return;
+        scalar $c->param('nocsrf') ||
+          $c->req->headers->header('X-NoCSRF')
+        ) or return;
 
       my $session = $c->session('nocsrf') or return;
       return if $session ne $param;
@@ -112,7 +119,7 @@ sub register {
 
 
   # Establish 'nocsrf_redirect_to' helper
-  $mojo->helper(
+  $app->helper(
     nocsrf_redirect_to => sub {
       my $c = shift;
 
@@ -129,8 +136,8 @@ sub register {
 
 
   # Establish 'nocsrf_render' helper
-  $mojo->helper(
-    nocsrf_render => sub {
+  $app->helper(
+    'reply.nocsrf' => sub {
       my $c = shift;
 
       # No attack detected
@@ -213,6 +220,11 @@ and implements the following new one.
 Called when registering the plugin.
 Accepts a parameter C<token_lenghth>, defining the length of the token in characters.
 Defaults to C<16>.
+All parameters can be set either on registration or as part
+of the configuration file with the key C<NoCSRF>
+(with the configuration file having the higher precedence).
+
+
 
 
 =head1 ROUTE CONDITIONS
@@ -225,7 +237,7 @@ Defaults to C<16>.
   };
 
   # Mojolicious
-  my $r = $mojo->routes;
+  my $r = $app->routes;
   $r->post('/information')->over('nocsrf')->to(cb => sub {
     shift->render(text => 'Fine!');
   });
@@ -298,16 +310,18 @@ redirected to the current url or a given path or url.
 An C<error> notification will contain an error message.
 
 
-=head2 nocsrf_render
+=head2 reply->nocsrf
 
-  return unless $c->nocsrf_render;
-  return unless $c->nocsrf_render('invalid');
+  return unless $c->reply->nocsrf;
+  return unless $c->reply->nocsrf('invalid');
 
 In case the L<nocsrf|/nocsrf> test fails, a template
 is rendered with the error code C<403>.
 If no template name is given, a default template is rendered
 
 An C<error> notification will contain an error message.
+
+This reply method is EXPERIMENTAL.
 
 
 =head1 AJAX REQUESTS
@@ -394,7 +408,7 @@ L<Mojolicious::Plugin::Util::RandomString>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013-2014, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2013-2016, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

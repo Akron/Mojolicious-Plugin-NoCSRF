@@ -50,6 +50,11 @@ and implements the following new one.
 Called when registering the plugin.
 Accepts a parameter C<token_lenghth>, defining the length of the token in characters.
 Defaults to C<16>.
+All parameters can be set either on registration or as part
+of the configuration file with the key C<NoCSRF>
+(with the configuration file having the higher precedence).
+
+
 
 
 =head1 ROUTE CONDITIONS
@@ -62,7 +67,7 @@ Defaults to C<16>.
   };
 
   # Mojolicious
-  my $r = $mojo->routes;
+  my $r = $app->routes;
   $r->post('/information')->over('nocsrf')->to(cb => sub {
     shift->render(text => 'Fine!');
   });
@@ -101,7 +106,7 @@ and automatically introduces a hidden nocsrf token value.
 =head2 nocsrf_url_for
 
   # In Controllers
-  print $c->nocsrf_url_fro('my-route');
+  print $c->nocsrf_url_for('my-route');
 
   # In templates
   %= nocsrf_url_for '/check'
@@ -135,16 +140,18 @@ redirected to the current url or a given path or url.
 An C<error> notification will contain an error message.
 
 
-=head2 nocsrf_render
+=head2 reply->nocsrf
 
-  return unless $c->nocsrf_render;
-  return unless $c->nocsrf_render('invalid');
+  return unless $c->reply->nocsrf;
+  return unless $c->reply->nocsrf('invalid');
 
 In case the L<nocsrf|/nocsrf> test fails, a template
 is rendered with the error code C<403>.
 If no template name is given, a default template is rendered
 
 An C<error> notification will contain an error message.
+
+This reply method is EXPERIMENTAL.
 
 
 =head1 AJAX REQUESTS
@@ -231,7 +238,7 @@ L<Mojolicious::Plugin::Util::RandomString>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013-2014, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2013-2016, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

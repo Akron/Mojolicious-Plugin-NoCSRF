@@ -78,7 +78,7 @@ get '/6' => sub {
 any [qw/GET POST/] => '/7' => sub {
   my $c = shift;
   if ($c->req->method eq 'GET') {
-    return unless $c->nocsrf_render;
+    return unless $c->reply->nocsrf;
     return $c->render(text => 'Fine');
   }
   else {
@@ -157,6 +157,9 @@ $t->post_ok('/7')
 $t->post_ok($url)
   ->status_is(302)
   ->header_like('Location', qr!/fine$!);
+
+
+
 
 done_testing;
 exit;
