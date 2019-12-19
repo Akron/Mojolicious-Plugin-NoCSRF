@@ -13,10 +13,10 @@ WriteMakefile(
     'Test::More' => 0
   },
   PREREQ_PM => {
-    'Mojolicious' => 5.29,
-    'Mojolicious::Plugin::Localize' => 0.02,
-    'Mojolicious::Plugin::Util::RandomString' => 0.02
-    },
+    'Mojolicious' => 8.02,
+    'Mojolicious::Plugin::Localize' => 0.20,
+    'Mojolicious::Plugin::Util::RandomString' => 0.08
+  },
   META_MERGE   => {
     requires  => { perl => '5.010001' },
     resources => {

@@ -132,12 +132,12 @@ $t->get_ok('/4')->content_like(qr!^http://www\.google\.com/\?nocsrf=.{16}$!);
 
 
 $t->get_ok('/5')->content_is('Not fine');
-my $url = $t->ua->get('/get_url?url=/5')->success->body;
+my $url = $t->ua->get('/get_url?url=/5')->result->body;
 $t->get_ok($url)->content_is('Fine');
 
 
 $t->get_ok('/6')->content_is('Not fine');
-$url = $t->ua->get('/get_url?url=/6')->success->body;
+$url = $t->ua->get('/get_url?url=/6')->result->body;
 $t->get_ok($url)->content_is('Fine');
 
 
@@ -147,7 +147,7 @@ $t->get_ok('/7')
   ->text_is('div.notify', 'No valid request')
   ->status_is(403);
 
-$url = $t->ua->get('/get_url?url=/7')->success->body;
+$url = $t->ua->get('/get_url?url=/7')->result->body;
 $t->get_ok($url)->content_is('Fine');
 
 $t->post_ok('/7')

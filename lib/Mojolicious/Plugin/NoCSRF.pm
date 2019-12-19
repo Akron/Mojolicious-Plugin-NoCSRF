@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 
 # See: https://docs.djangoproject.com/en/dev/ref/csrf/#how-csrf-works
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # Todo: Make nocsrf_render to reply->nocsrf
 
@@ -408,7 +408,7 @@ L<Mojolicious::Plugin::Util::RandomString>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013-2016, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2013-2019, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
