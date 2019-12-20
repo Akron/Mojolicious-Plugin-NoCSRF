@@ -1,5 +1,6 @@
-0.05 2019-12-19
+0.05 2019-12-20
         - Update tests for Mojolicious > 8.02.
+        - Fixed dependency on M::P::Notifications.
 
 0.04 2016-08-14
         - Configuration now possible via configuration file.
