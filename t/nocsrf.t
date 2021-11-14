@@ -51,7 +51,7 @@ get '/4' => sub {
 };
 
 
-get('/5')->over('nocsrf')->to(
+get('/5')->requires('nocsrf')->to(
   cb => sub {
     my $c = shift;
     return $c->render(text => 'Fine');

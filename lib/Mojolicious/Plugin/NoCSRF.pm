@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 
 # See: https://docs.djangoproject.com/en/dev/ref/csrf/#how-csrf-works
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # Todo: Make nocsrf_render to reply->nocsrf
 
